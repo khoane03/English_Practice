@@ -1,0 +1,222 @@
+[
+  {
+    "id": "q001",
+    "question": "Do you have a job or are you a student?",
+    "answer": "I have a job"
+  },
+  {
+    "id": "q002",
+    "question": "How do you usually get to your university?",
+    "answer": "I usually get to my university by motobike"
+  },
+  {
+    "id": "q003",
+    "question": "When did you start to learn English?",
+    "answer": "I strated leaning english when I was in secondary school"
+  },
+  {
+    "id": "q004",
+    "question": "Do you like it? Why? Why not?",
+    "answer": "Yes, I do. Because it is useful for my future job"
+  },
+  {
+    "id": "q005",
+    "question": "Tell me something about your plans for the future.",
+    "answer": "I plan to becom software engineer and travel arround VN in the future"
+  },
+  {
+    "id": "q006",
+    "question": "What are your hobbies?",
+    "answer": "My hobbies are listening to music and playing to sports"
+  },
+  {
+    "id": "q007",
+    "question": "Do you like video games? Why? Why not?",
+    "answer": "Yes, I do. Because they help me relex"
+  },
+  {
+    "id": "q008",
+    "question": "Do you think video games are bad for children? Why?",
+    "answer": "Yes, I think so. Because playing too many video games can affect childrent’s health and studies"
+  },
+  {
+    "id": "q009",
+    "question": "Where did you go on your last holiday?",
+    "answer": "I went to Sam Son on my last holiday"
+  },
+  {
+    "id": "q010",
+    "question": "Did you enjoy it? Why?",
+    "answer": "Yes, I did. Because it was fun and relaxing"
+  },
+  {
+    "id": "q011",
+    "question": "Do you have a large family or a small family?",
+    "answer": "I have a small family. There are five people in my family: my father, my mother, my younger brother, my younger sister and me"
+  },
+  {
+    "id": "q012",
+    "question": "How much time do you spend with your family?",
+    "answer": "I spend a lot of time with my family. We usually have dinner together every day"
+  },
+  {
+    "id": "q013",
+    "question": "How many hours do you study each day?",
+    "answer": "I usually spend fours hours a day studying."
+  },
+  {
+    "id": "q014",
+    "question": "Do you enjoy your study? Why?",
+    "answer": "Yes, I do, Because it helps me gain knowledge and improve my skills"
+  },
+  {
+    "id": "q015",
+    "question": "What do you usually do in your free time?",
+    "answer": "I usually listen to music and watch short video in my free time"
+  },
+  {
+    "id": "q016",
+    "question": "Do you prefer to stay alone or with your friends? Why?",
+    "answer": "I prefer to stay with my friends because they make me happy and relaxed"
+  },
+  {
+    "id": "q017",
+    "question": "Do you like going out? Why?",
+    "answer": "Yes, I do. Because it helps me relax"
+  },
+  {
+    "id": "q018",
+    "question": "What do you usually do when you go out?",
+    "answer": "I usually go shopping and eat out with my friends"
+  },
+  {
+    "id": "q019",
+    "question": "Tell me about your favourite sport.",
+    "answer": "My favourite sport is badminton. Because they keep me active and healthy"
+  },
+  {
+    "id": "q020",
+    "question": "What kind of food do you like best?",
+    "answer": "My favourite food is fired chicken"
+  },
+  {
+    "id": "q021",
+    "question": "Do you like cooking? Why?",
+    "answer": "Yes, I do, Because cookin help me a relax"
+  },
+  {
+    "id": "q022",
+    "question": "How often do you eat out?",
+    "answer": "I eat out once or twice a week"
+  },
+  {
+    "id": "q023",
+    "question": "What kind of sport do you like playing? Why?",
+    "answer": "I like badminton because it makes me feel relaxed"
+  },
+  {
+    "id": "q024",
+    "question": "Tell me what you enjoy doing in your free time.",
+    "answer": "I enjoy listen to musice and watch short video in my free time"
+  },
+  {
+    "id": "q025",
+    "question": "What do you study at the university?",
+    "answer": "I study information teachnology at university"
+  },
+  {
+    "id": "q026",
+    "question": "Are you happy with your student life?",
+    "answer": "yes, I am. Because I can learn new things and make new friends"
+  },
+  {
+    "id": "q027",
+    "question": "What did you have for dinner yesterday?",
+    "answer": "I had rice, vegetable and chicken for dinner yesterday"
+  },
+  {
+    "id": "q028",
+    "question": "Tell me about the kind of food you like.",
+    "answer": "I like fried chicken"
+  },
+  {
+    "id": "q029",
+    "question": "Do you often watch TV?",
+    "answer": "yes, I do, because it help me relax"
+  },
+  {
+    "id": "q030",
+    "question": "What TV programs do you like?",
+    "answer": "I like sport and music program"
+  },
+  {
+    "id": "q031",
+    "question": "Where do you live?",
+    "answer": "I live in Ha Noi"
+  },
+  {
+    "id": "q032",
+    "question": "Do you like living there? Why?",
+    "answer": "yes, I do. Because it is a beautiful and lively city"
+  },
+  {
+    "id": "q033",
+    "question": "Can you play any musical instrument such as guitar, piano or violin?",
+    "answer": "No, I can’t. But I’d like to learn in the future"
+  },
+  {
+    "id": "q034",
+    "question": "What other country would you like to visit? Why?",
+    "answer": "I would like to visit japan. Because it has beautiful scenery and delicious food"
+  },
+  {
+    "id": "q035",
+    "question": "What are the popular sports in Vietnam?",
+    "answer": "I think the popular sports in vietnam are footbal, badminton, volleyball…."
+  },
+  {
+    "id": "q036",
+    "question": "How often do you play sports?",
+    "answer": "I play sport twice a week"
+  },
+  {
+    "id": "q037",
+    "question": "Do you like reading? Why?",
+    "answer": "yes, I do. Because it help me relax"
+  },
+  {
+    "id": "q038",
+    "question": "What kind of book do you like best?",
+    "answer": "My favourite books are short stories"
+  },
+  {
+    "id": "q039",
+    "question": "What do you think about the importance of English in your life?",
+    "answer": "I thinks english is important because If I can good at english, I can find a good job easily"
+  },
+  {
+    "id": "q040",
+    "question": "Do you often go out for a meal?",
+    "answer": "No, I don’t. I usually eat at home"
+  },
+  {
+    "id": "q041",
+    "question": "Tell me about the sports you like.",
+    "answer": "I like badminton Because they keep me active and healthy"
+  },
+  {
+    "id": "q042",
+    "question": "Do you think video games are bad for young children? Why/Why not?",
+    "answer": "Yes, I think so.Because playing too many video games can affect childrent’s health and studies"
+  },
+  {
+    "id": "q043",
+    "question": "Do you like your job/study? Why/Why not?",
+    "answer": "yes, I do. Because it help me learn new things and improve my skills"
+  },
+  {
+    "id": "q044",
+    "question": "Do you like English? Why/Why not?",
+    "answer": "yes, I do, Because it is useful for my future job"
+  }
+]

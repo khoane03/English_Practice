@@ -1,0 +1,124 @@
+<section class="practice-page">
+  <div class="practice-heading">
+    <div>
+      <a class="back-link" routerLink="/">← Back to home</a>
+      <div class="title-line">
+        <div>
+          <span class="eyebrow">{{ mode() === 'mixed' ? 'A fresh set every time' : 'Every text prompt' }}</span>
+          <h1 class="page-heading">{{ title() }}</h1>
+        </div>
+        @if (items().length && !result()) {
+          <span class="question-count">{{ items().length }} questions</span>
+        }
+      </div>
+      <p class="page-description">
+        @if (mode() === 'mixed') {
+          Answer five text prompts and every question for one randomly chosen picture.
+        } @else {
+          Answer every question in your text bank. Your prompts are shuffled for this test.
+        }
+      </p>
+    </div>
+  </div>
+
+  @if (mode() === 'mixed' && data.imageExercises().length === 0) {
+    <section class="card empty-state unavailable">
+      <span class="empty-illustration" aria-hidden="true">▧</span>
+      <h2>Add a picture exercise to begin</h2>
+      <p>Your question bank is ready, but mixed tests also need one image exercise. Add a Cloudinary image with its questions to get started.</p>
+      <a class="primary-button" routerLink="/images">Open image question bank <span aria-hidden="true">→</span></a>
+    </section>
+  } @else if (items().length === 0) {
+    <section class="card empty-state">
+      <h2>There are no questions yet</h2>
+      <p>Add a few prompts to your question bank before starting a test.</p>
+      <a class="primary-button" routerLink="/questions">Open question bank <span aria-hidden="true">→</span></a>
+    </section>
+  } @else {
+    @if (result(); as answersReview) {
+      <section class="score-card card" aria-live="polite">
+        <div class="score-number">{{ score() }}<span> / {{ answersReview.length }}</span></div>
+        <div class="score-copy">
+          <span class="eyebrow">Practice complete</span>
+          <h2>{{ accuracy() }}% accuracy</h2>
+          <p>{{ score() }} correct · {{ answersReview.length - score() }} to keep practicing</p>
+        </div>
+        <div class="score-meter" role="img" [attr.aria-label]="accuracy() + ' percent accuracy'">
+          <span [style.width.%]="accuracy()"></span>
+        </div>
+      </section>
+    } @else {
+      <div class="progress-row">
+        <span>All questions in one view</span>
+        <span>{{ items().length }} total</span>
+      </div>
+      <div class="progress-track" aria-label="Test questions">
+        <span [style.width.%]="100"></span>
+      </div>
+    }
+
+    <div class="test-content">
+      @for (item of textItems(); track item.id; let index = $index) {
+        <article class="question-card card" [class.review-card]="resultFor(item.id)" [class.is-correct]="resultFor(item.id)?.correct" [class.is-incorrect]="resultFor(item.id) && !resultFor(item.id)?.correct">
+          <div class="question-meta">
+            <span class="question-index">Question {{ index + 1 }}</span>
+            @if (resultFor(item.id); as review) {
+              <span class="review-status" [class.correct-status]="review.correct">{{ review.correct ? 'Correct' : 'Keep practicing' }}</span>
+            }
+          </div>
+          <h2>{{ item.question }}</h2>
+          @if (resultFor(item.id); as review) {
+            <div class="review-answer"><span>Your answer</span><p>{{ review.userAnswer || 'No answer entered' }}</p></div>
+            <div class="review-answer correct-answer"><span>Reference answer</span><p>{{ review.answer }}</p></div>
+            @if (review.explanation) { <p class="explanation">{{ review.explanation }}</p> }
+          } @else {
+            <app-answer-input [id]="'answer-' + item.id" [question]="item.question" [value]="answerFor(item.id)" (valueChange)="setAnswer(item.id, $event)" />
+          }
+        </article>
+      }
+
+      @if (imageItems().length) {
+        <section class="image-practice card">
+          <div class="image-practice-heading">
+            <span class="eyebrow">Look closely</span>
+            <h2>{{ imageItems()[0].imageTitle || 'Picture practice' }}</h2>
+          </div>
+          <div class="image-practice-layout">
+            <div class="image-preview">
+              <img [src]="imageItems()[0].image" [alt]="imageItems()[0].imageTitle || 'Picture for English practice'" />
+            </div>
+            <div class="image-question-list">
+              @for (item of imageItems(); track item.id; let index = $index) {
+                <article class="image-question" [class.is-correct]="resultFor(item.id)?.correct" [class.is-incorrect]="resultFor(item.id) && !resultFor(item.id)?.correct">
+                  <div class="question-meta">
+                    <span class="question-index">Picture question {{ index + 1 }}</span>
+                    @if (resultFor(item.id); as review) {
+                      <span class="review-status" [class.correct-status]="review.correct">{{ review.correct ? 'Correct' : 'Keep practicing' }}</span>
+                    }
+                  </div>
+                  <h3>{{ item.question }}</h3>
+                  @if (resultFor(item.id); as review) {
+                    <div class="review-answer"><span>Your answer</span><p>{{ review.userAnswer || 'No answer entered' }}</p></div>
+                    <div class="review-answer correct-answer"><span>Reference answer</span><p>{{ review.answer }}</p></div>
+                    @if (review.explanation) { <p class="explanation">{{ review.explanation }}</p> }
+                  } @else {
+                    <app-answer-input [id]="'answer-' + item.id" [question]="item.question" [value]="answerFor(item.id)" (valueChange)="setAnswer(item.id, $event)" />
+                  }
+                </article>
+              }
+            </div>
+          </div>
+        </section>
+      }
+    </div>
+
+    <div class="test-actions">
+      @if (result()) {
+        <a class="secondary-button" routerLink="/">Back to home</a>
+        <button class="primary-button" type="button" (click)="start()">Try again <span aria-hidden="true">↻</span></button>
+      } @else {
+        <button class="primary-button" type="button" (click)="submit()">Finish test <span aria-hidden="true">→</span></button>
+      }
+    </div>
+  }
+</section>

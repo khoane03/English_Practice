@@ -1,0 +1,55 @@
+<section class="welcome">
+  <div class="welcome-copy">
+    <span class="eyebrow">A little practice goes a long way</span>
+    <h1>Build confidence,<br /><span>one answer at a time.</span></h1>
+    <p>Practice everyday English with thoughtful prompts from your own question bank.</p>
+    <div class="welcome-actions">
+      <a class="primary-button" routerLink="/practice/mixed">Start a mixed test <span aria-hidden="true">→</span></a>
+      <a class="text-link" routerLink="/practice/full">Take the full test</a>
+    </div>
+  </div>
+  <div class="welcome-note" aria-label="Practice tip">
+    <span class="note-icon" aria-hidden="true">✳</span>
+    <p>There’s no rush.<br /><strong>Find your own words.</strong></p>
+    <span class="note-line"></span>
+    <span class="note-caption">Your personal English practice space</span>
+  </div>
+</section>
+
+<section class="section-block">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">Choose how to practice</span>
+      <h2>Your next session</h2>
+    </div>
+    <span class="subtle-count">{{ questionCount() }} prompts in your bank</span>
+  </div>
+  <div class="practice-grid">
+    <a class="practice-card card" routerLink="/practice/mixed">
+      <div class="card-icon mixed-icon" aria-hidden="true"><span>✎</span><span>▧</span></div>
+      <span class="card-kicker">A little of everything</span>
+      <h3>Mixed test</h3>
+      <p>Five text questions and one picture exercise, picked fresh each time.</p>
+      <span class="card-action">Start mixed practice <span aria-hidden="true">→</span></span>
+    </a>
+    <a class="practice-card card" routerLink="/practice/full">
+      <div class="card-icon full-icon" aria-hidden="true"><span>☷</span></div>
+      <span class="card-kicker">Take your time</span>
+      <h3>Full test</h3>
+      <p>Work through every text prompt in your bank, in a new order.</p>
+      <span class="card-action">Start full practice <span aria-hidden="true">→</span></span>
+    </a>
+  </div>
+</section>
+
+<section class="manage-row">
+  <div>
+    <span class="eyebrow">Make it yours</span>
+    <h2>Keep your practice fresh</h2>
+    <p>Add questions you want to work on or practice describing a picture.</p>
+  </div>
+  <div class="manage-actions">
+    <a class="secondary-button" routerLink="/questions">Manage questions <span aria-hidden="true">↗</span></a>
+    <a class="secondary-button" routerLink="/images">Image question bank <span class="image-count">{{ imageCount() }}</span></a>
+  </div>
+</section>

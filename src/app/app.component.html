@@ -1,0 +1,25 @@
+<div class="app-shell">
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" routerLink="/" aria-label="English Practice home">
+        <span class="brand-mark" aria-hidden="true">E</span>
+        <span class="brand-name">English <span>Practice</span></span>
+      </a>
+      <nav class="primary-nav" aria-label="Main navigation">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+        <a routerLink="/practice/mixed" routerLinkActive="active">Practice</a>
+        <a routerLink="/questions" routerLinkActive="active">Question Bank</a>
+        <a routerLink="/images" routerLinkActive="active">Image Questions</a>
+      </nav>
+    </div>
+  </header>
+  <main class="page-frame">
+    <router-outlet />
+  </main>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>Small steps, stronger English.</span>
+      <span>Practice at your own pace</span>
+    </div>
+  </footer>
+</div>

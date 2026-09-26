@@ -1,0 +1,133 @@
+<section class="image-bank-page">
+  <header class="bank-heading">
+    <div>
+      <span class="eyebrow">Practice what you see</span>
+      <h1 class="page-heading">Image question bank</h1>
+      <p class="page-description">Add Cloudinary image exercises and the questions that go with each picture.</p>
+    </div>
+    <div class="heading-actions">
+      <button class="secondary-button" type="button" (click)="exportExercises()">Export JSON <span aria-hidden="true">↓</span></button>
+      <button class="primary-button" type="button" (click)="openNewExercise()">＋ Add image exercise</button>
+    </div>
+  </header>
+
+  @if (notice()) { <p class="status-message" role="status">{{ notice() }}</p> }
+
+  @if (exerciseFormOpen()) {
+    <section class="editor card">
+      <div class="editor-heading">
+        <div>
+          <span class="eyebrow">{{ editingExerciseId() ? 'Update your library' : 'Add to your library' }}</span>
+          <h2>{{ editingExerciseId() ? 'Edit image exercise' : 'New image exercise' }}</h2>
+        </div>
+        <button class="quiet-button" type="button" aria-label="Close image exercise editor" (click)="closeExerciseForm()">✕</button>
+      </div>
+      <form (ngSubmit)="saveExercise()">
+        <label class="form-field">
+          <span>Cloudinary image URL <b aria-hidden="true">*</b></span>
+          <input name="imageUrl" [(ngModel)]="imageUrlText" (ngModelChange)="imageUrlError.set('')" required placeholder="https://res.cloudinary.com/your-cloud/image/upload/..." />
+          <small class="form-help">Use an HTTPS image URL from res.cloudinary.com.</small>
+          @if (imageUrlError()) { <span class="field-error" role="alert">{{ imageUrlError() }}</span> }
+        </label>
+        <label class="form-field">
+          <span>Exercise title <span class="optional">(optional)</span></span>
+          <input name="title" [(ngModel)]="titleText" placeholder="A short label for this picture" />
+        </label>
+        @if (!editingExerciseId()) {
+          <div class="first-question-fields">
+            <label class="form-field">
+              <span>First question <b aria-hidden="true">*</b></span>
+              <textarea name="firstQuestion" [(ngModel)]="firstQuestionText" required placeholder="What would you like to ask about the image?"></textarea>
+            </label>
+            <label class="form-field">
+              <span>Answer <b aria-hidden="true">*</b></span>
+              <textarea name="firstAnswer" [(ngModel)]="firstAnswerText" required placeholder="Enter the provided answer"></textarea>
+            </label>
+          </div>
+          <p class="form-help">An image exercise needs at least one complete question and answer. You can add more after saving.</p>
+        }
+        <div class="editor-actions">
+          <button class="secondary-button" type="button" (click)="closeExerciseForm()">Cancel</button>
+          <button class="primary-button" type="submit">{{ editingExerciseId() ? 'Save changes' : 'Add exercise' }}</button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (questionFormExerciseId()) {
+    <section class="editor card">
+      <div class="editor-heading">
+        <div>
+          <span class="eyebrow">Picture prompt</span>
+          <h2>{{ editingQuestionId() ? 'Edit image question' : 'Add image question' }}</h2>
+        </div>
+        <button class="quiet-button" type="button" aria-label="Close image question editor" (click)="closeQuestionForm()">✕</button>
+      </div>
+      <form (ngSubmit)="saveImageQuestion()">
+        <label class="form-field">
+          <span>Question <b aria-hidden="true">*</b></span>
+          <textarea name="question" [(ngModel)]="questionText" required placeholder="Enter the question"></textarea>
+        </label>
+        <label class="form-field">
+          <span>Answer <b aria-hidden="true">*</b></span>
+          <textarea name="answer" [(ngModel)]="answerText" required placeholder="Enter the answer"></textarea>
+        </label>
+        <label class="form-field">
+          <span>Accepted answers <span class="optional">(optional)</span></span>
+          <textarea name="acceptedAnswers" [(ngModel)]="acceptedAnswersText" placeholder="Add one alternative per line"></textarea>
+        </label>
+        <label class="form-field">
+          <span>Explanation <span class="optional">(optional)</span></span>
+          <input name="explanation" [(ngModel)]="explanationText" placeholder="A note for review" />
+        </label>
+        <div class="editor-actions">
+          <button class="secondary-button" type="button" (click)="closeQuestionForm()">Cancel</button>
+          <button class="primary-button" type="submit">{{ editingQuestionId() ? 'Save changes' : 'Add question' }}</button>
+        </div>
+      </form>
+    </section>
+  }
+
+  <section class="exercise-list" aria-label="Image exercises">
+    @for (exercise of exercises(); track exercise.id) {
+      <article class="exercise-card card">
+        <div class="exercise-cover">
+          <img [src]="exercise.image" [alt]="exercise.title || 'English practice image'" loading="lazy" />
+        </div>
+        <div class="exercise-content">
+          <div class="exercise-title-row">
+            <div>
+              <span class="entry-id">{{ exercise.id }} · {{ exercise.questions.length }} {{ exercise.questions.length === 1 ? 'question' : 'questions' }}</span>
+              <h2>{{ exercise.title || 'Picture exercise' }}</h2>
+            </div>
+            <div class="exercise-actions">
+              <button class="quiet-button" type="button" (click)="editExercise(exercise)">Edit image</button>
+              <button class="secondary-button add-question-button" type="button" (click)="openNewQuestion(exercise)">＋ Add question</button>
+            </div>
+          </div>
+          @for (question of exercise.questions; track question.id) {
+            <div class="image-question-entry">
+              <div>
+                <span class="entry-id">{{ question.id }}</span>
+                <h3>{{ question.question }}</h3>
+                <p class="answer-text">{{ question.answer }}</p>
+                @if (question.acceptedAnswers?.length) {
+                  <p class="accepted-text">Also accepted: {{ question.acceptedAnswers?.join(' · ') }}</p>
+                }
+                @if (question.explanation) { <p class="explanation-text">{{ question.explanation }}</p> }
+              </div>
+              <button class="quiet-button" type="button" (click)="editQuestion(exercise, question)" [attr.aria-label]="'Edit image question ' + question.id">Edit <span aria-hidden="true">↗</span></button>
+            </div>
+          }
+        </div>
+      </article>
+    } @empty {
+      <div class="card empty-state empty-images">
+        <span class="empty-illustration" aria-hidden="true">▧</span>
+        <h3>No image exercises yet</h3>
+        <p>Add a Cloudinary image with at least one question and answer. Your mixed tests will include one of these exercises.</p>
+        <button class="primary-button" type="button" (click)="openNewExercise()">Add your first exercise</button>
+      </div>
+    }
+  </section>
+</section>

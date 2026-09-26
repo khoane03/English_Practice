@@ -1,0 +1,101 @@
+<section class="bank-page">
+  <header class="bank-heading">
+    <div>
+      <span class="eyebrow">Your personal library</span>
+      <h1 class="page-heading">Question bank</h1>
+      <p class="page-description">Keep the prompts and answers you want to practice in one place.</p>
+    </div>
+    <div class="heading-actions">
+      <button class="secondary-button" type="button" (click)="exportQuestions()">Export JSON <span aria-hidden="true">↓</span></button>
+      <button class="primary-button" type="button" (click)="openNewQuestion()">＋ Add question</button>
+    </div>
+  </header>
+
+  @if (notice()) {
+    <p class="status-message" role="status">{{ notice() }}</p>
+  }
+
+  @if (formOpen()) {
+    <section class="editor card">
+      <div class="editor-heading">
+        <div>
+          <span class="eyebrow">{{ editingId() ? 'Update your library' : 'Add to your library' }}</span>
+          <h2>{{ editingId() ? 'Edit question' : 'New question' }}</h2>
+        </div>
+        <button class="quiet-button" type="button" aria-label="Close question editor" (click)="closeForm()">✕</button>
+      </div>
+      <form (ngSubmit)="saveQuestion()">
+        <label class="form-field">
+          <span>Question <b aria-hidden="true">*</b></span>
+          <textarea name="question" [(ngModel)]="questionText" required placeholder="Enter a question"></textarea>
+        </label>
+        <label class="form-field">
+          <span>Answer <b aria-hidden="true">*</b></span>
+          <textarea name="answer" [(ngModel)]="answerText" required placeholder="Enter the preferred answer"></textarea>
+        </label>
+        <label class="form-field">
+          <span>Accepted answers <span class="optional">(optional)</span></span>
+          <textarea name="acceptedAnswers" [(ngModel)]="acceptedAnswersText" placeholder="Add one alternative per line"></textarea>
+          <small class="form-help">Each line is checked as an equally correct answer.</small>
+        </label>
+        <div class="optional-fields">
+          <label class="form-field">
+            <span>Explanation <span class="optional">(optional)</span></span>
+            <input name="explanation" [(ngModel)]="explanationText" placeholder="A note for review" />
+          </label>
+          <label class="form-field">
+            <span>Category <span class="optional">(optional)</span></span>
+            <input name="category" [(ngModel)]="categoryText" placeholder="For example, daily life" />
+          </label>
+          <label class="form-field">
+            <span>Level <span class="optional">(optional)</span></span>
+            <input name="level" [(ngModel)]="levelText" placeholder="For example, A2" />
+          </label>
+        </div>
+        <div class="editor-actions">
+          <button class="secondary-button" type="button" (click)="closeForm()">Cancel</button>
+          <button class="primary-button" type="submit">{{ editingId() ? 'Save changes' : 'Add question' }}</button>
+        </div>
+      </form>
+    </section>
+  }
+
+  <section class="bank-toolbar">
+    <label class="search-field">
+      <span aria-hidden="true">⌕</span>
+      <input aria-label="Search questions" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Search questions and answers" />
+    </label>
+    <span class="result-count">{{ filteredQuestions().length }} of {{ questions().length }} questions</span>
+  </section>
+
+  <section class="question-list" aria-label="Questions">
+    @for (question of filteredQuestions(); track question.id; let index = $index) {
+      <article class="question-entry card">
+        <div class="entry-number">{{ index + 1 }}</div>
+        <div class="entry-content">
+          <span class="entry-id">{{ question.id }}@if (question.category) { <span> · {{ question.category }}</span> }</span>
+          <h2>{{ question.question }}</h2>
+          <div class="answer-copy">
+            <span>Answer</span>
+            <p>{{ question.answer }}</p>
+          </div>
+          @if (question.acceptedAnswers?.length) {
+            <div class="accepted-copy">
+              <span>Also accepted</span>
+              <p>{{ question.acceptedAnswers?.join(' · ') }}</p>
+            </div>
+          }
+          @if (question.explanation) {
+            <p class="explanation-copy">{{ question.explanation }}</p>
+          }
+        </div>
+        <button class="quiet-button edit-button" type="button" (click)="editQuestion(question)" [attr.aria-label]="'Edit question ' + question.id">Edit <span aria-hidden="true">↗</span></button>
+      </article>
+    } @empty {
+      <div class="card empty-state">
+        <h3>{{ search() ? 'No questions match that search' : 'Your question bank is empty' }}</h3>
+        <p>{{ search() ? 'Try a different word or phrase.' : 'Add a question to start building a practice set.' }}</p>
+      </div>
+    }
+  </section>
+</section>
