@@ -14,7 +14,8 @@ Open `http://localhost:4200`. App edits are saved in this browser's local storag
 ## Question data
 
 - `src/assets/data/questions.json` contains the initial 44 text questions.
-- `src/assets/data/image-exercises.json` starts empty; add only exercises with a valid HTTPS Cloudinary image URL and provided questions/answers.
+- `src/assets/data/image-exercises.json` starts empty; each exercise must have a valid HTTPS Cloudinary image URL and at least one question with an answer. Image exercises can have any number of questions.
+- Image exercise forms can upload images directly to Cloudinary using a cloud name and unsigned upload preset. For local builds, copy `.env.example` to `.env.local` and fill in both values. For GitHub Pages, set the repository Actions variables `CLOUDINARY_CLOUD_NAME` and `CLOUDINARY_UPLOAD_PRESET`; the deploy workflow injects them at build time. These values are public in the generated website. Never add the Cloudinary API secret to this static app; restrict allowed formats and upload size in the unsigned preset. Without environment values, the image bank allows saving the settings in the current browser.
 - Both banks export their current data as JSON. Replace the corresponding asset JSON with an export when you want to update the app's initial data for everyone.
 
 Answers are compared locally after normalizing case, punctuation, and whitespace. Both primary and accepted answers are checked exactly after normalization; there is no AI grading.

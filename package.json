@@ -3,10 +3,13 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "prestart": "node scripts/generate-cloudinary-config.mjs",
     "start": "ng serve",
+    "prebuild": "node scripts/generate-cloudinary-config.mjs",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "validate:data": "node scripts/validate-data.mjs",
+    "pretest": "node scripts/generate-cloudinary-config.mjs",
     "test": "ng test"
   },
   "private": true,

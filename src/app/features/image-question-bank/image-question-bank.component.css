@@ -34,15 +34,110 @@
   font-size: 19px;
 }
 
+.upload-settings {
+  margin-bottom: 17px;
+  padding: 13px 14px;
+  border: 1px solid #e6eae4;
+  border-radius: 9px;
+  background: #fafbf9;
+}
+
+.upload-settings summary {
+  color: #51645a;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.upload-settings > .form-help {
+  display: block;
+  margin-top: 8px;
+}
+
+.settings-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+  gap: 10px;
+  margin-block: 12px 8px;
+}
+
+.settings-fields .secondary-button {
+  min-height: 43px;
+}
+
 .editor form {
   display: grid;
   gap: 14px;
 }
 
-.first-question-fields {
+.upload-field {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 13px;
+  border: 1px dashed #ccd8cc;
+  border-radius: 9px;
+  background: #fafbf9;
+}
+
+.upload-label {
+  color: #53635a;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.upload-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.upload-preview {
+  display: block;
+  width: min(100%, 340px);
+  max-height: 220px;
+  border: 1px solid #e6eae4;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.new-exercise-questions {
+  display: grid;
   gap: 12px;
+}
+
+.questions-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.questions-heading .form-help {
+  margin: 5px 0 0;
+}
+
+.exercise-question-fields {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e8ece7;
+  border-radius: 9px;
+}
+
+.draft-number {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf2eb;
+  color: #607566;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .optional {
@@ -168,9 +263,13 @@
   color: #909991;
 }
 
-.image-question-entry > .quiet-button {
-  min-height: 30px;
+.question-entry-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
+
+
 
 .empty-images .primary-button {
   margin-top: 17px;
@@ -205,7 +304,11 @@
     flex: 1;
   }
 
-  .first-question-fields {
+  .exercise-question-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-fields {
     grid-template-columns: 1fr;
   }
 
