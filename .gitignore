@@ -48,6 +48,7 @@ __screenshots__/
 .env.*
 !.env.example
 !.env.*.example
+/src/app/core/config/cloudinary.config.generated.ts
 
 # System files
 .DS_Store

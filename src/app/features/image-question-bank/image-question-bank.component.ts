@@ -2,31 +2,46 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ImageExercise, ImageQuestion } from '../../core/models/practice.models';
+import { CloudinaryUploadService } from '../../core/services/cloudinary-upload.service';
 import { DataService } from '../../core/services/data.service';
 import { JsonExportService } from '../../core/services/json-export.service';
+import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog.component';
 
 @Component({
   selector: 'app-image-question-bank',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmationDialogComponent],
   templateUrl: './image-question-bank.component.html',
   styleUrl: './image-question-bank.component.css',
 })
 export class ImageQuestionBankComponent {
   private readonly data = inject(DataService);
   private readonly exporter = inject(JsonExportService);
+  private readonly cloudinary = inject(CloudinaryUploadService);
 
   readonly exercises = this.data.imageExercises;
+  readonly uploadSettings = this.cloudinary.settings;
   readonly exerciseFormOpen = signal(false);
   readonly editingExerciseId = signal<string | null>(null);
   readonly questionFormExerciseId = signal<string | null>(null);
   readonly editingQuestionId = signal<string | null>(null);
   readonly notice = signal('');
+  readonly confirmation = signal<{
+    title: string;
+    message: string;
+    confirmLabel: string;
+    action: () => void;
+  } | null>(null);
   readonly imageUrlError = signal('');
+  readonly uploadError = signal('');
+  readonly uploading = signal(false);
+  readonly uploadedSelection = signal(false);
+  readonly selectedFile = signal<File | null>(null);
+  readonly cloudNameText = signal(this.uploadSettings().cloudName);
+  readonly uploadPresetText = signal(this.uploadSettings().uploadPreset);
 
   imageUrlText = '';
   titleText = '';
-  firstQuestionText = '';
-  firstAnswerText = '';
+  newExerciseQuestions = [this.createQuestionDraft()];
   questionText = '';
   answerText = '';
   acceptedAnswersText = '';
@@ -34,6 +49,8 @@ export class ImageQuestionBankComponent {
 
   openNewExercise(): void {
     this.resetExerciseForm();
+    this.cloudNameText.set(this.uploadSettings().cloudName);
+    this.uploadPresetText.set(this.uploadSettings().uploadPreset);
     this.editingExerciseId.set(null);
     this.exerciseFormOpen.set(true);
     this.questionFormExerciseId.set(null);
@@ -47,6 +64,7 @@ export class ImageQuestionBankComponent {
     this.exerciseFormOpen.set(true);
     this.questionFormExerciseId.set(null);
     this.imageUrlError.set('');
+    this.uploadError.set('');
     this.notice.set('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -75,10 +93,12 @@ export class ImageQuestionBankComponent {
       return;
     }
 
-    const firstQuestion = this.firstQuestionText.trim();
-    const firstAnswer = this.firstAnswerText.trim();
-    if (!firstQuestion || !firstAnswer) {
-      this.notice.set('Add the first image question and answer before saving the exercise.');
+    const questions = this.newExerciseQuestions.map(({ question, answer }) => ({
+      question: question.trim(),
+      answer: answer.trim(),
+    }));
+    if (questions.some(({ question, answer }) => !question || !answer)) {
+      this.notice.set('Complete every image question and answer, or remove the empty question row.');
       return;
     }
     const exerciseId = this.createExerciseId();
@@ -86,17 +106,61 @@ export class ImageQuestionBankComponent {
       id: exerciseId,
       image,
       ...(this.titleText.trim() ? { title: this.titleText.trim() } : {}),
-      questions: [
-        {
-          id: `${exerciseId}-q1`,
-          question: firstQuestion,
-          answer: firstAnswer,
-        },
-      ],
+      questions: questions.map(({ question, answer }, index) => ({
+        id: `${exerciseId}-q${index + 1}`,
+        question,
+        answer,
+      })),
     };
     this.data.saveImageExercises([exercise, ...this.exercises()]);
     this.closeExerciseForm();
     this.notice.set('Image exercise added.');
+  }
+
+  saveUploadSettings(): void {
+    try {
+      this.cloudinary.saveSettings({
+        cloudName: this.cloudNameText(),
+        uploadPreset: this.uploadPresetText(),
+      });
+      this.notice.set('Cloudinary upload settings saved in this browser.');
+      this.uploadError.set('');
+    } catch (error) {
+      this.uploadError.set(
+        error instanceof Error ? error.message : 'Could not save Cloudinary settings.',
+      );
+    }
+  }
+
+  selectImage(event: Event): void {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+    this.uploadError.set('');
+    this.uploadedSelection.set(false);
+    this.selectedFile.set(input.files?.[0] ?? null);
+  }
+
+  async uploadSelectedImage(): Promise<void> {
+    const file = this.selectedFile();
+    if (!file || this.uploading() || this.uploadedSelection()) {
+      return;
+    }
+    this.uploading.set(true);
+    this.uploadError.set('');
+    try {
+      this.imageUrlText = await this.cloudinary.upload(file);
+      this.imageUrlError.set('');
+      this.uploadedSelection.set(true);
+      this.notice.set('Image uploaded. Finish the exercise details and save it.');
+    } catch (error) {
+      this.uploadError.set(
+        error instanceof Error ? error.message : 'The image could not be uploaded.',
+      );
+    } finally {
+      this.uploading.set(false);
+    }
   }
 
   openNewQuestion(exercise: ImageExercise): void {
@@ -159,6 +223,81 @@ export class ImageQuestionBankComponent {
     this.notice.set(isEditing ? 'Image question updated.' : 'Image question added.');
   }
 
+  deleteImageQuestion(exercise: ImageExercise, question: ImageQuestion): void {
+    if (exercise.questions.length <= 1) {
+      this.notice.set('An image exercise must keep at least one question.');
+      return;
+    }
+    this.confirmation.set({
+      title: 'Delete this question?',
+      message: `"${question.question}" will be permanently removed from this image exercise.`,
+      confirmLabel: 'Delete question',
+      action: () => {
+        this.data.saveImageExercises(
+          this.exercises().map((item) =>
+            item.id === exercise.id
+              ? { ...item, questions: item.questions.filter((entry) => entry.id !== question.id) }
+              : item,
+          ),
+        );
+        if (this.editingQuestionId() === question.id) {
+          this.closeQuestionForm();
+        }
+        this.notice.set('Image question deleted.');
+      },
+    });
+  }
+
+  deleteExercise(exercise: ImageExercise): void {
+    const label = exercise.title || exercise.id;
+    this.confirmation.set({
+      title: 'Delete this image exercise?',
+      message: `"${label}" and all ${exercise.questions.length} associated ${exercise.questions.length === 1 ? 'question' : 'questions'} will be permanently removed.`,
+      confirmLabel: 'Delete image',
+      action: () => {
+        this.data.saveImageExercises(
+          this.exercises().filter((item) => item.id !== exercise.id),
+        );
+        if (this.questionFormExerciseId() === exercise.id) {
+          this.closeQuestionForm();
+        }
+        if (this.editingExerciseId() === exercise.id) {
+          this.closeExerciseForm();
+        }
+        this.notice.set(`Image exercise "${label}" and its questions were deleted.`);
+      },
+    });
+  }
+
+  addExerciseQuestionDraft(): void {
+    this.newExerciseQuestions.push(this.createQuestionDraft());
+  }
+
+  removeExerciseQuestionDraft(index: number): void {
+    if (this.newExerciseQuestions.length <= 1) {
+      this.notice.set('An image exercise needs at least one question and answer.');
+      return;
+    }
+    this.confirmation.set({
+      title: 'Remove this question row?',
+      message: `Question ${index + 1} and its current answer will be removed from this unsaved exercise.`,
+      confirmLabel: 'Remove row',
+      action: () => {
+        this.newExerciseQuestions.splice(index, 1);
+      },
+    });
+  }
+
+  confirmPendingAction(): void {
+    const request = this.confirmation();
+    this.confirmation.set(null);
+    request?.action();
+  }
+
+  cancelPendingAction(): void {
+    this.confirmation.set(null);
+  }
+
   closeExerciseForm(): void {
     this.exerciseFormOpen.set(false);
     this.editingExerciseId.set(null);
@@ -175,7 +314,7 @@ export class ImageQuestionBankComponent {
     this.exporter.download('image-exercises.json', this.exercises());
   }
 
-  private isCloudinaryUrl(value: string): boolean {
+  isCloudinaryUrl(value: string): boolean {
     try {
       const url = new URL(value);
       return (
@@ -209,9 +348,11 @@ export class ImageQuestionBankComponent {
   private resetExerciseForm(): void {
     this.imageUrlText = '';
     this.titleText = '';
-    this.firstQuestionText = '';
-    this.firstAnswerText = '';
+    this.newExerciseQuestions = [this.createQuestionDraft()];
     this.imageUrlError.set('');
+    this.uploadError.set('');
+    this.uploadedSelection.set(false);
+    this.selectedFile.set(null);
   }
 
   private resetQuestionForm(): void {
@@ -219,5 +360,9 @@ export class ImageQuestionBankComponent {
     this.answerText = '';
     this.acceptedAnswersText = '';
     this.explanationText = '';
+  }
+
+  private createQuestionDraft(): { question: string; answer: string } {
+    return { question: '', answer: '' };
   }
 }

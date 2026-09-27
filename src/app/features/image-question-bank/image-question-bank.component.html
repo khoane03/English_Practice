@@ -22,33 +22,91 @@
         </div>
         <button class="quiet-button" type="button" aria-label="Close image exercise editor" (click)="closeExerciseForm()">✕</button>
       </div>
+      @if (uploadSettings().cloudName && uploadSettings().uploadPreset) {
+        <p class="status-message" role="status">Cloudinary upload is configured for <strong>{{ uploadSettings().cloudName }}</strong>.</p>
+      } @else {
+        <details class="upload-settings" open>
+          <summary>Cloudinary upload settings</summary>
+          <p class="form-help">Use your Cloudinary cloud name and an unsigned upload preset. These settings are saved only in this browser.</p>
+          <div class="settings-fields">
+            <label class="form-field">
+              <span>Cloud name</span>
+              <input name="cloudName" [ngModel]="cloudNameText()" (ngModelChange)="cloudNameText.set($event)" autocomplete="off" placeholder="your-cloud-name" />
+            </label>
+            <label class="form-field">
+              <span>Unsigned upload preset</span>
+              <input name="uploadPreset" [ngModel]="uploadPresetText()" (ngModelChange)="uploadPresetText.set($event)" autocomplete="off" placeholder="your-unsigned-preset" />
+            </label>
+            <button class="secondary-button" type="button" (click)="saveUploadSettings()">Save settings</button>
+          </div>
+          <small class="form-help">Create an unsigned preset in Cloudinary → Settings → Upload. Never enter your API secret here.</small>
+        </details>
+      }
       <form (ngSubmit)="saveExercise()">
+        <div class="upload-field">
+          <span class="upload-label">Upload an image</span>
+          <div class="upload-controls">
+            <input class="file-input" type="file" accept="image/*" aria-label="Choose an image to upload" (change)="selectImage($event)" />
+            <button class="secondary-button" type="button" [attr.aria-busy]="uploading()" [disabled]="!selectedFile() || uploading() || uploadedSelection()" (click)="uploadSelectedImage()">
+              @if (uploading()) {
+                <span class="button-spinner" aria-hidden="true"></span> Uploading…
+              } @else {
+                Upload to Cloudinary
+              }
+            </button>
+          </div>
+          @if (selectedFile() && uploadedSelection()) {
+            <small class="form-help">Image uploaded successfully and added to the URL field.</small>
+          } @else if (selectedFile()) {
+            <small class="form-help">Selected: {{ selectedFile()?.name }} · maximum size 10 MB</small>
+          } @else {
+            <small class="form-help">Choose an image file. Uploading fills the Cloudinary URL below.</small>
+          }
+          @if (uploadError()) { <span class="field-error" role="alert">{{ uploadError() }}</span> }
+        </div>
         <label class="form-field">
           <span>Cloudinary image URL <b aria-hidden="true">*</b></span>
-          <input name="imageUrl" [(ngModel)]="imageUrlText" (ngModelChange)="imageUrlError.set('')" required placeholder="https://res.cloudinary.com/your-cloud/image/upload/..." />
-          <small class="form-help">Use an HTTPS image URL from res.cloudinary.com.</small>
+          <input name="imageUrl" [(ngModel)]="imageUrlText" (ngModelChange)="imageUrlError.set('')" required placeholder="Upload an image or paste a Cloudinary URL" />
+          <small class="form-help">You can upload above or paste a URL from res.cloudinary.com.</small>
           @if (imageUrlError()) { <span class="field-error" role="alert">{{ imageUrlError() }}</span> }
         </label>
+        @if (imageUrlText && isCloudinaryUrl(imageUrlText)) {
+          <img class="upload-preview" [src]="imageUrlText" alt="Preview of the selected exercise image" />
+        }
         <label class="form-field">
           <span>Exercise title <span class="optional">(optional)</span></span>
           <input name="title" [(ngModel)]="titleText" placeholder="A short label for this picture" />
         </label>
         @if (!editingExerciseId()) {
-          <div class="first-question-fields">
-            <label class="form-field">
-              <span>First question <b aria-hidden="true">*</b></span>
-              <textarea name="firstQuestion" [(ngModel)]="firstQuestionText" required placeholder="What would you like to ask about the image?"></textarea>
-            </label>
-            <label class="form-field">
-              <span>Answer <b aria-hidden="true">*</b></span>
-              <textarea name="firstAnswer" [(ngModel)]="firstAnswerText" required placeholder="Enter the provided answer"></textarea>
-            </label>
+          <div class="new-exercise-questions">
+            <div class="questions-heading">
+              <div>
+                <span class="upload-label">Questions for this image</span>
+                <p class="form-help">Add as many questions and answers as you need.</p>
+              </div>
+              <button class="quiet-button add-draft-button" type="button" (click)="addExerciseQuestionDraft()">＋ Add question</button>
+            </div>
+            @for (draft of newExerciseQuestions; track $index; let index = $index) {
+              <div class="exercise-question-fields">
+                <span class="draft-number">{{ index + 1 }}</span>
+                <label class="form-field">
+                  <span>Question {{ index + 1 }} <b aria-hidden="true">*</b></span>
+                  <textarea [name]="'newQuestion' + index" [(ngModel)]="draft.question" required [placeholder]="'Enter question ' + (index + 1)"></textarea>
+                </label>
+                <label class="form-field">
+                  <span>Answer {{ index + 1 }} <b aria-hidden="true">*</b></span>
+                  <textarea [name]="'newAnswer' + index" [(ngModel)]="draft.answer" required [placeholder]="'Enter answer ' + (index + 1)"></textarea>
+                </label>
+                @if (newExerciseQuestions.length > 1) {
+                  <button class="danger-button remove-draft-button" type="button" (click)="removeExerciseQuestionDraft(index)" [attr.aria-label]="'Remove question ' + (index + 1)">Remove</button>
+                }
+              </div>
+            }
           </div>
-          <p class="form-help">An image exercise needs at least one complete question and answer. You can add more after saving.</p>
         }
         <div class="editor-actions">
           <button class="secondary-button" type="button" (click)="closeExerciseForm()">Cancel</button>
-          <button class="primary-button" type="submit">{{ editingExerciseId() ? 'Save changes' : 'Add exercise' }}</button>
+          <button class="primary-button" type="submit" [disabled]="uploading()">{{ editingExerciseId() ? 'Save changes' : 'Add exercise' }}</button>
         </div>
       </form>
     </section>
@@ -103,6 +161,7 @@
             <div class="exercise-actions">
               <button class="quiet-button" type="button" (click)="editExercise(exercise)">Edit image</button>
               <button class="secondary-button add-question-button" type="button" (click)="openNewQuestion(exercise)">＋ Add question</button>
+              <button class="danger-button delete-exercise-button" type="button" (click)="deleteExercise(exercise)">Delete image</button>
             </div>
           </div>
           @for (question of exercise.questions; track question.id) {
@@ -116,7 +175,10 @@
                 }
                 @if (question.explanation) { <p class="explanation-text">{{ question.explanation }}</p> }
               </div>
-              <button class="quiet-button" type="button" (click)="editQuestion(exercise, question)" [attr.aria-label]="'Edit image question ' + question.id">Edit <span aria-hidden="true">↗</span></button>
+              <div class="question-entry-actions">
+                <button class="quiet-button" type="button" (click)="editQuestion(exercise, question)" [attr.aria-label]="'Edit image question ' + question.id">Edit <span aria-hidden="true">↗</span></button>
+                <button class="danger-button" type="button" [disabled]="exercise.questions.length <= 1" (click)="deleteImageQuestion(exercise, question)" [attr.aria-label]="'Delete image question ' + question.id">Delete</button>
+              </div>
             </div>
           }
         </div>
@@ -130,4 +192,13 @@
       </div>
     }
   </section>
+  @if (confirmation(); as request) {
+    <app-confirmation-dialog
+      [title]="request.title"
+      [message]="request.message"
+      [confirmLabel]="request.confirmLabel"
+      (confirmed)="confirmPendingAction()"
+      (cancelled)="cancelPendingAction()"
+    />
+  }
 </section>
