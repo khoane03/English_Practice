@@ -6,10 +6,15 @@ import { CloudinaryUploadService } from '../../core/services/cloudinary-upload.s
 import { DataService } from '../../core/services/data.service';
 import { JsonExportService } from '../../core/services/json-export.service';
 import { ConfirmationDialogComponent } from '../../shared/components/confirmation-dialog.component';
+import { LanguageToolsComponent } from '../../shared/components/language-tools.component';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 @Component({
   selector: 'app-image-question-bank',
-  imports: [CommonModule, FormsModule, ConfirmationDialogComponent],
+  imports: [CommonModule, FormsModule, ConfirmationDialogComponent, LanguageToolsComponent],
   templateUrl: './image-question-bank.component.html',
   styleUrl: './image-question-bank.component.css',
 })
@@ -312,6 +317,102 @@ export class ImageQuestionBankComponent {
 
   exportExercises(): void {
     this.exporter.download('image-exercises.json', this.exercises());
+  }
+
+  async importExercises(event: Event): Promise<void> {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    try {
+      const imported = this.validateExercises(JSON.parse(await file.text()) as unknown);
+      if (!window.confirm(`Replace all ${this.exercises().length} current image exercises with ${imported.length} imported exercises?`)) {
+        return;
+      }
+      this.data.saveImageExercises(imported);
+      this.notice.set(`Imported ${imported.length} image exercises. Your previous list was replaced.`);
+    } catch (error) {
+      this.notice.set(error instanceof Error ? error.message : 'Could not import the image exercises JSON file.');
+    }
+  }
+
+  private validateExercises(value: unknown): ImageExercise[] {
+    if (!Array.isArray(value)) {
+      throw new Error('Invalid image exercises file: expected a JSON array exported from the image question bank.');
+    }
+
+    const exerciseIds = new Set<string>();
+    const questionIds = new Set<string>();
+    return value.map((entry, index) => {
+      const row = index + 1;
+      if (
+        !isRecord(entry) ||
+        typeof entry['id'] !== 'string' ||
+        !entry['id'].trim() ||
+        typeof entry['image'] !== 'string' ||
+        !this.isCloudinaryUrl(entry['image']) ||
+        !Array.isArray(entry['questions']) ||
+        entry['questions'].length === 0 ||
+        (entry['title'] !== undefined && typeof entry['title'] !== 'string')
+      ) {
+        throw new Error(`Invalid image exercise at row ${row}: check its ID, Cloudinary URL, title, and questions.`);
+      }
+      if (exerciseIds.has(entry['id'])) {
+        throw new Error(`Invalid image exercises file: duplicate exercise ID "${entry['id']}".`);
+      }
+      exerciseIds.add(entry['id']);
+
+      const questions = entry['questions'].map((question, questionIndex): ImageQuestion => {
+        if (
+          !isRecord(question) ||
+          typeof question['id'] !== 'string' ||
+          !question['id'].trim() ||
+          typeof question['question'] !== 'string' ||
+          !question['question'].trim() ||
+          typeof question['answer'] !== 'string' ||
+          !question['answer'].trim()
+        ) {
+          throw new Error(`Invalid question ${questionIndex + 1} in image exercise row ${row}.`);
+        }
+        if (questionIds.has(question['id'])) {
+          throw new Error(`Invalid image exercises file: duplicate question ID "${question['id']}".`);
+        }
+        questionIds.add(question['id']);
+        if (
+          (question['acceptedAnswers'] !== undefined &&
+            (!Array.isArray(question['acceptedAnswers']) ||
+              question['acceptedAnswers'].some((answer) => typeof answer !== 'string'))) ||
+          (question['explanation'] !== undefined && typeof question['explanation'] !== 'string')
+        ) {
+          throw new Error(`Invalid question ${questionIndex + 1} in image exercise row ${row}: optional fields have an unexpected format.`);
+        }
+
+        return {
+          id: question['id'],
+          question: question['question'],
+          answer: question['answer'],
+          ...(question['acceptedAnswers']
+            ? { acceptedAnswers: question['acceptedAnswers'] as string[] }
+            : {}),
+          ...(typeof question['explanation'] === 'string'
+            ? { explanation: question['explanation'] }
+            : {}),
+        };
+      });
+
+      return {
+        id: entry['id'],
+        image: entry['image'],
+        ...(typeof entry['title'] === 'string' ? { title: entry['title'] } : {}),
+        questions,
+      };
+    });
   }
 
   isCloudinaryUrl(value: string): boolean {

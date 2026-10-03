@@ -6,10 +6,13 @@
       <p class="page-description">Keep the prompts and answers you want to practice in one place.</p>
     </div>
     <div class="heading-actions">
+      <input #importFile type="file" accept="application/json,.json" hidden (change)="importQuestions($event)" />
+      <button class="secondary-button" type="button" (click)="importFile.click()">Import JSON <span aria-hidden="true">↑</span></button>
       <button class="secondary-button" type="button" (click)="exportQuestions()">Export JSON <span aria-hidden="true">↓</span></button>
       <button class="primary-button" type="button" (click)="openNewQuestion()">＋ Add question</button>
     </div>
   </header>
+  <p class="form-help">Importing a JSON file replaces all questions in this browser. Export your current questions first if you want a backup.</p>
 
   @if (notice()) {
     <p class="status-message" role="status">{{ notice() }}</p>
@@ -75,9 +78,11 @@
         <div class="entry-content">
           <span class="entry-id">{{ question.id }}@if (question.category) { <span> · {{ question.category }}</span> }</span>
           <h2>{{ question.question }}</h2>
+          <app-language-tools [text]="question.question" label="question" />
           <div class="answer-copy">
             <span>Answer</span>
             <p>{{ question.answer }}</p>
+            <app-language-tools [text]="question.answer" label="answer" />
           </div>
           @if (question.acceptedAnswers?.length) {
             <div class="accepted-copy">
