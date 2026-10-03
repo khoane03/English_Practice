@@ -1,8 +1,10 @@
 import { Component, input, model } from '@angular/core';
+import { LanguageToolsComponent } from './language-tools.component';
 
 @Component({
   selector: 'app-answer-input',
   standalone: true,
+  imports: [LanguageToolsComponent],
   template: `
     <label class="answer-label" [for]="id()">Your answer</label>
     <textarea
@@ -14,6 +16,7 @@ import { Component, input, model } from '@angular/core';
       placeholder="Write your answer here..."
       rows="2"
     ></textarea>
+    <app-language-tools [text]="value()" label="answer" />
   `,
   styles: [
     `

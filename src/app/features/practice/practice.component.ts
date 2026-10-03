@@ -6,10 +6,11 @@ import { AnswerReview, PracticeItem } from '../../core/models/practice.models';
 import { DataService } from '../../core/services/data.service';
 import { PracticeService } from '../../core/services/practice.service';
 import { AnswerInputComponent } from '../../shared/components/answer-input.component';
+import { LanguageToolsComponent } from '../../shared/components/language-tools.component';
 
 @Component({
   selector: 'app-practice',
-  imports: [CommonModule, RouterLink, AnswerInputComponent],
+  imports: [CommonModule, RouterLink, AnswerInputComponent, LanguageToolsComponent],
   templateUrl: './practice.component.html',
   styleUrl: './practice.component.css',
 })

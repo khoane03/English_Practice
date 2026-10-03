@@ -67,9 +67,13 @@
             }
           </div>
           <h2>{{ item.question }}</h2>
+          <app-language-tools [text]="item.question" label="question" />
           @if (resultFor(item.id); as review) {
             <div class="review-answer"><span>Your answer</span><p>{{ review.userAnswer || 'No answer entered' }}</p></div>
-            <div class="review-answer correct-answer"><span>Reference answer</span><p>{{ review.answer }}</p></div>
+            <div class="review-answer correct-answer">
+              <span>Reference answer</span><p>{{ review.answer }}</p>
+              <app-language-tools [text]="review.answer" label="answer" />
+            </div>
             @if (review.explanation) { <p class="explanation">{{ review.explanation }}</p> }
           } @else {
             <app-answer-input [id]="'answer-' + item.id" [question]="item.question" [value]="answerFor(item.id)" (valueChange)="setAnswer(item.id, $event)" />
@@ -97,9 +101,13 @@
                     }
                   </div>
                   <h3>{{ item.question }}</h3>
+                  <app-language-tools [text]="item.question" label="question" />
                   @if (resultFor(item.id); as review) {
                     <div class="review-answer"><span>Your answer</span><p>{{ review.userAnswer || 'No answer entered' }}</p></div>
-                    <div class="review-answer correct-answer"><span>Reference answer</span><p>{{ review.answer }}</p></div>
+                    <div class="review-answer correct-answer">
+                      <span>Reference answer</span><p>{{ review.answer }}</p>
+                      <app-language-tools [text]="review.answer" label="answer" />
+                    </div>
                     @if (review.explanation) { <p class="explanation">{{ review.explanation }}</p> }
                   } @else {
                     <app-answer-input [id]="'answer-' + item.id" [question]="item.question" [value]="answerFor(item.id)" (valueChange)="setAnswer(item.id, $event)" />

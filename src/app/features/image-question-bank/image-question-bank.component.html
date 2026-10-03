@@ -6,10 +6,13 @@
       <p class="page-description">Add Cloudinary image exercises and the questions that go with each picture.</p>
     </div>
     <div class="heading-actions">
+      <input #importFile type="file" accept="application/json,.json" hidden (change)="importExercises($event)" />
+      <button class="secondary-button" type="button" (click)="importFile.click()">Import JSON <span aria-hidden="true">↑</span></button>
       <button class="secondary-button" type="button" (click)="exportExercises()">Export JSON <span aria-hidden="true">↓</span></button>
       <button class="primary-button" type="button" (click)="openNewExercise()">＋ Add image exercise</button>
     </div>
   </header>
+  <p class="form-help">Importing a JSON file replaces all image exercises in this browser. Export your current exercises first if you want a backup.</p>
 
   @if (notice()) { <p class="status-message" role="status">{{ notice() }}</p> }
 
@@ -169,7 +172,9 @@
               <div>
                 <span class="entry-id">{{ question.id }}</span>
                 <h3>{{ question.question }}</h3>
+                <app-language-tools [text]="question.question" label="question" />
                 <p class="answer-text">{{ question.answer }}</p>
+                <app-language-tools [text]="question.answer" label="answer" />
                 @if (question.acceptedAnswers?.length) {
                   <p class="accepted-text">Also accepted: {{ question.acceptedAnswers?.join(' · ') }}</p>
                 }

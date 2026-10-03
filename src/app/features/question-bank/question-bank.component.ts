@@ -4,10 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { DataService } from '../../core/services/data.service';
 import { JsonExportService } from '../../core/services/json-export.service';
 import { Question } from '../../core/models/practice.models';
+import { LanguageToolsComponent } from '../../shared/components/language-tools.component';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 @Component({
   selector: 'app-question-bank',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LanguageToolsComponent],
   templateUrl: './question-bank.component.html',
   styleUrl: './question-bank.component.css',
 })
@@ -101,6 +106,77 @@ export class QuestionBankComponent {
 
   exportQuestions(): void {
     this.exporter.download('questions.json', this.questions());
+  }
+
+  async importQuestions(event: Event): Promise<void> {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    try {
+      const imported = this.validateQuestions(JSON.parse(await file.text()) as unknown);
+      if (!window.confirm(`Replace all ${this.questions().length} current questions with ${imported.length} imported questions?`)) {
+        return;
+      }
+      this.data.saveQuestions(imported);
+      this.notice.set(`Imported ${imported.length} questions. Your previous question list was replaced.`);
+    } catch (error) {
+      this.notice.set(error instanceof Error ? error.message : 'Could not import the questions JSON file.');
+    }
+  }
+
+  private validateQuestions(value: unknown): Question[] {
+    if (!Array.isArray(value)) {
+      throw new Error('Invalid questions file: expected a JSON array exported from the question bank.');
+    }
+
+    const ids = new Set<string>();
+    return value.map((entry, index) => {
+      const row = index + 1;
+      if (
+        !isRecord(entry) ||
+        typeof entry['id'] !== 'string' ||
+        !entry['id'].trim() ||
+        typeof entry['question'] !== 'string' ||
+        !entry['question'].trim() ||
+        typeof entry['answer'] !== 'string' ||
+        !entry['answer'].trim()
+      ) {
+        throw new Error(`Invalid question at row ${row}: id, question, and answer must be non-empty strings.`);
+      }
+      if (ids.has(entry['id'])) {
+        throw new Error(`Invalid questions file: duplicate question ID "${entry['id']}".`);
+      }
+      ids.add(entry['id']);
+      if (
+        (entry['acceptedAnswers'] !== undefined &&
+          (!Array.isArray(entry['acceptedAnswers']) ||
+            entry['acceptedAnswers'].some((answer) => typeof answer !== 'string'))) ||
+        ['explanation', 'category', 'level'].some(
+          (field) => entry[field] !== undefined && typeof entry[field] !== 'string',
+        )
+      ) {
+        throw new Error(`Invalid question at row ${row}: optional fields have an unexpected format.`);
+      }
+
+      return {
+        id: entry['id'],
+        question: entry['question'],
+        answer: entry['answer'],
+        ...(entry['acceptedAnswers']
+          ? { acceptedAnswers: entry['acceptedAnswers'] as string[] }
+          : {}),
+        ...(typeof entry['explanation'] === 'string' ? { explanation: entry['explanation'] } : {}),
+        ...(typeof entry['category'] === 'string' ? { category: entry['category'] } : {}),
+        ...(typeof entry['level'] === 'string' ? { level: entry['level'] } : {}),
+      };
+    });
   }
 
   private createId(): string {
