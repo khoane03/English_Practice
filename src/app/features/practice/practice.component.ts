@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AnswerReview, PracticeItem } from '../../core/models/practice.models';
+import { AnswerSuggestionService } from '../../core/services/answer-suggestion.service';
 import { DataService } from '../../core/services/data.service';
 import { PracticeService } from '../../core/services/practice.service';
 import { AnswerInputComponent } from '../../shared/components/answer-input.component';
@@ -10,7 +12,7 @@ import { LanguageToolsComponent } from '../../shared/components/language-tools.c
 
 @Component({
   selector: 'app-practice',
-  imports: [CommonModule, RouterLink, AnswerInputComponent, LanguageToolsComponent],
+  imports: [CommonModule, FormsModule, RouterLink, AnswerInputComponent, LanguageToolsComponent],
   templateUrl: './practice.component.html',
   styleUrl: './practice.component.css',
 })
@@ -18,7 +20,10 @@ export class PracticeComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   readonly data = inject(DataService);
+  readonly answerSuggestions = inject(AnswerSuggestionService);
   private readonly practice = inject(PracticeService);
+  readonly apiKeyDraft = signal(this.answerSuggestions.apiKey());
+  readonly apiKeyNotice = signal('');
 
   readonly mode = signal<'mixed' | 'full'>('mixed');
   readonly items = signal<PracticeItem[]>([]);
@@ -47,6 +52,16 @@ export class PracticeComponent {
       this.mode() === 'full'
         ? this.practice.createFullTest(this.data.questions())
         : this.practice.createMixedTest(this.data.questions(), this.data.imageExercises()),
+    );
+  }
+
+  saveGroqApiKey(): void {
+    this.answerSuggestions.saveApiKey(this.apiKeyDraft());
+    this.apiKeyDraft.set(this.answerSuggestions.apiKey());
+    this.apiKeyNotice.set(
+      this.answerSuggestions.apiKey()
+        ? 'Groq API key saved in this browser.'
+        : 'Groq API key removed.',
     );
   }
 

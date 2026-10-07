@@ -20,6 +20,43 @@
       </p>
     </div>
   </div>
+  <details class="ai-settings card">
+    <summary>
+      <span class="ai-settings-icon" aria-hidden="true">✦</span>
+      <span>AI answer suggestions <span class="ai-provider">Groq</span></span>
+      <span class="ai-settings-summary-hint">{{ answerSuggestions.apiKey() ? 'API key saved' : 'Set up your API key' }}</span>
+    </summary>
+    <div class="ai-settings-content">
+      <div class="ai-setup-guide">
+        <span class="ai-setup-title">Create a free Groq API key</span>
+        <ol>
+          <li>Open <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">GroqCloud API Keys <span aria-hidden="true">↗</span></a> and sign in or create an account.</li>
+          <li>Select <strong>Create API Key</strong>, give it a name, then create and copy the key.</li>
+          <li>Paste it below and select <strong>Save key</strong>.</li>
+        </ol>
+      </div>
+      <label class="api-key-label" for="groq-api-key">Your Groq API key</label>
+    <div class="ai-settings-controls">
+        <div class="api-key-input-wrap">
+          <span aria-hidden="true">⌑</span>
+          <input
+            id="groq-api-key"
+            type="password"
+            autocomplete="new-password"
+            spellcheck="false"
+            [ngModel]="apiKeyDraft()"
+            (ngModelChange)="apiKeyDraft.set($event); apiKeyNotice.set('')"
+            placeholder="gsk_••••••••••••••••"
+          />
+        </div>
+        <button class="api-key-save" type="button" (click)="saveGroqApiKey()">Save key <span aria-hidden="true">→</span></button>
+      </div>
+      <p class="api-key-privacy">Your key is saved only in this browser and sent directly to Groq when you request a suggestion. Never share it publicly.</p>
+      @if (apiKeyNotice()) {
+        <p class="ai-settings-notice" role="status"><span aria-hidden="true">✓</span> {{ apiKeyNotice() }}</p>
+      }
+    </div>
+  </details>
 
   @if (mode() === 'mixed' && data.imageExercises().length === 0) {
     <section class="card empty-state unavailable">
@@ -76,7 +113,7 @@
             </div>
             @if (review.explanation) { <p class="explanation">{{ review.explanation }}</p> }
           } @else {
-            <app-answer-input [id]="'answer-' + item.id" [question]="item.question" [value]="answerFor(item.id)" (valueChange)="setAnswer(item.id, $event)" />
+            <app-answer-input [id]="'answer-' + item.id" [question]="item.question" [referenceAnswer]="item.answer" [imageUrl]="item.image ?? ''" [value]="answerFor(item.id)" (valueChange)="setAnswer(item.id, $event)" />
           }
         </article>
       }
@@ -110,7 +147,7 @@
                     </div>
                     @if (review.explanation) { <p class="explanation">{{ review.explanation }}</p> }
                   } @else {
-                    <app-answer-input [id]="'answer-' + item.id" [question]="item.question" [value]="answerFor(item.id)" (valueChange)="setAnswer(item.id, $event)" />
+                    <app-answer-input [id]="'answer-' + item.id" [question]="item.question" [referenceAnswer]="item.answer" [imageUrl]="item.image ?? ''" [value]="answerFor(item.id)" (valueChange)="setAnswer(item.id, $event)" />
                   }
                 </article>
               }
