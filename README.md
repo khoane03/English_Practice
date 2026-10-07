@@ -20,6 +20,8 @@ Open `http://localhost:4200`. App edits are saved in this browser's local storag
 
 Answers are compared locally after normalizing case, punctuation, and whitespace. Both primary and accepted answers are checked exactly after normalization; there is no AI grading.
 
+Question and answer cards include browser-based English read-aloud and English-to-Vietnamese translation. Translation requests send the selected text to the public MyMemory translation service; do not use this feature with private or sensitive content. Speech uses the browser's built-in speech synthesis.
+
 ## Production build
 
 ```bash
