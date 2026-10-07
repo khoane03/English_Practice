@@ -10,6 +10,12 @@ import { PracticeService } from '../../core/services/practice.service';
 import { AnswerInputComponent } from '../../shared/components/answer-input.component';
 import { LanguageToolsComponent } from '../../shared/components/language-tools.component';
 
+interface ImageQuestionGroup {
+  image: string;
+  title: string;
+  items: PracticeItem[];
+}
+
 @Component({
   selector: 'app-practice',
   imports: [CommonModule, FormsModule, RouterLink, AnswerInputComponent, LanguageToolsComponent],
@@ -31,6 +37,23 @@ export class PracticeComponent {
   readonly result = signal<AnswerReview[] | null>(null);
   readonly textItems = computed(() => this.items().filter((item) => item.source === 'text'));
   readonly imageItems = computed(() => this.items().filter((item) => item.source === 'image'));
+  readonly imageGroups = computed(() => {
+    const groups = new Map<string, ImageQuestionGroup>();
+    for (const item of this.imageItems()) {
+      const image = item.image ?? '';
+      const group = groups.get(image);
+      if (group) {
+        group.items.push(item);
+      } else {
+        groups.set(image, {
+          image,
+          title: item.imageTitle || 'Picture practice',
+          items: [item],
+        });
+      }
+    }
+    return [...groups.values()];
+  });
   readonly score = computed(() => this.result()?.filter((answer) => answer.correct).length ?? 0);
   readonly accuracy = computed(() => {
     const total = this.result()?.length ?? 0;
@@ -50,7 +73,7 @@ export class PracticeComponent {
     this.answers.set({});
     this.items.set(
       this.mode() === 'full'
-        ? this.practice.createFullTest(this.data.questions())
+        ? this.practice.createFullTest(this.data.questions(), this.data.imageExercises())
         : this.practice.createMixedTest(this.data.questions(), this.data.imageExercises()),
     );
   }

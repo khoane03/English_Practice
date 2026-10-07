@@ -44,10 +44,15 @@ export class AnswerSuggestionService {
         type: 'text',
         text: [
           'You are an English tutor. Suggest one concise, natural English answer to the question.',
-          'Do not copy the reference answer verbatim; express the same correct information in a different way.',
+          imageUrl
+            ? 'Answer using details you can actually read or observe in the attached image. Treat the image as the primary source; use the reference answer only as a secondary cross-check. If they conflict, trust the image. Do not invent details that are not visible.'
+            : 'Use the reference answer as factual guidance, but do not copy it verbatim; express the correct information in a different way.',
+          imageUrl
+            ? 'Do not copy the reference answer verbatim; express image-supported information in a different way.'
+            : '',
           'Keep the response suitable for a language learner. Return only the suggested answer, with no explanation or quotation marks.',
           `Question: ${question}`,
-          referenceAnswer ? `Reference answer for factual guidance: ${referenceAnswer}` : '',
+          referenceAnswer ? `Reference answer for cross-checking only: ${referenceAnswer}` : '',
         ]
           .filter(Boolean)
           .join('\n'),
@@ -78,10 +83,14 @@ export class AnswerSuggestionService {
           'You are a friendly English speaking tutor helping a Vietnamese learner.',
           'Explain in Vietnamese how to answer this specific question, and provide useful English sentence starters plus one short, natural sample answer in English.',
           'Adapt the structure to the question type. For open prompts such as "Tell me about..." or "Talk about...", teach a simple structure: introduce the topic, add 2-3 relevant details, then give a feeling or reason. Do not force that structure onto short factual questions.',
-          'Use the reference answer only to keep the sample factually aligned; do not copy it verbatim.',
+          imageUrl
+            ? 'For this image question, first inspect and read the attached image, including any visible text. Base the sample answer on information actually shown in the image. Treat the image as the primary source and the reference answer only as a secondary cross-check; if they conflict, trust the image. Never invent missing details.'
+            : 'Use the reference answer only to keep the sample factually aligned; do not copy it verbatim.',
           'Use these concise headings: Cấu trúc trả lời, Cụm từ gợi ý, Ví dụ. Keep the whole response brief and do not answer unrelated questions.',
           `Câu hỏi: ${question}`,
-          referenceAnswer ? `Đáp án tham khảo để giữ đúng thông tin: ${referenceAnswer}` : '',
+          referenceAnswer
+            ? `Đáp án tham khảo${imageUrl ? ' (chỉ dùng để đối chiếu với ảnh)' : ''}: ${referenceAnswer}`
+            : '',
         ]
           .filter(Boolean)
           .join('\n'),
@@ -92,10 +101,13 @@ export class AnswerSuggestionService {
       content.push({ type: 'image_url', image_url: { url: imageUrl } });
     }
 
-    return this.requestSuggestion(content);
+    return this.requestSuggestion(content, imageUrl ? 280 : 200);
   }
 
-  private async requestSuggestion(content: Array<Record<string, unknown>>): Promise<string> {
+  private async requestSuggestion(
+    content: Array<Record<string, unknown>>,
+    maxCompletionTokens = 200,
+  ): Promise<string> {
     const apiKey = this.apiKey();
     if (!apiKey) {
       throw new Error('Add your Groq API key in the practice settings first.');
@@ -113,7 +125,7 @@ export class AnswerSuggestionService {
           model: 'qwen/qwen3.8-27b',
           messages: [{ role: 'user', content }],
           temperature: 0.8,
-          max_completion_tokens: 200,
+          max_completion_tokens: maxCompletionTokens,
         }),
       });
     } catch (error) {
