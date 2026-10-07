@@ -15,18 +15,17 @@ export class PracticeService {
         source: 'text',
       }));
     const exercise = this.shuffle(exercises)[0];
-    const imageItems = exercise.questions.map((question) => ({
-      ...question,
-      image: exercise.image,
-      imageTitle: exercise.title,
-      source: 'image' as const,
-    }));
+    const imageItems = this.mapImageQuestions([exercise]);
 
     return this.shuffle([...textItems, ...imageItems]);
   }
 
-  createFullTest(questions: Question[]): PracticeItem[] {
-    return this.shuffle(questions).map((question) => ({ ...question, source: 'text' }));
+  createFullTest(questions: Question[], exercises: ImageExercise[]): PracticeItem[] {
+    const textItems: PracticeItem[] = questions.map((question) => ({
+      ...question,
+      source: 'text',
+    }));
+    return this.shuffle([...textItems, ...this.mapImageQuestions(exercises)]);
   }
 
   evaluate(items: PracticeItem[], answers: Record<string, string>): AnswerReview[] {
@@ -49,6 +48,17 @@ export class PracticeService {
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .replace(/\s+/g, ' ')
       .trim();
+  }
+
+  private mapImageQuestions(exercises: ImageExercise[]): PracticeItem[] {
+    return exercises.flatMap((exercise) =>
+      exercise.questions.map((question) => ({
+        ...question,
+        image: exercise.image,
+        imageTitle: exercise.title,
+        source: 'image' as const,
+      })),
+    );
   }
 
   private shuffle<T>(items: T[]): T[] {

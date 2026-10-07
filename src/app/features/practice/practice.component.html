@@ -4,7 +4,7 @@
       <a class="back-link" routerLink="/">← Back to home</a>
       <div class="title-line">
         <div>
-          <span class="eyebrow">{{ mode() === 'mixed' ? 'A fresh set every time' : 'Every text prompt' }}</span>
+          <span class="eyebrow">{{ mode() === 'mixed' ? 'A fresh set every time' : 'Every question in your banks' }}</span>
           <h1 class="page-heading">{{ title() }}</h1>
         </div>
         @if (items().length && !result()) {
@@ -15,7 +15,7 @@
         @if (mode() === 'mixed') {
           Answer five text prompts and every question for one randomly chosen picture.
         } @else {
-          Answer every question in your text bank. Your prompts are shuffled for this test.
+          Answer every text and picture question in your banks. All prompts are shuffled for this test.
         }
       </p>
     </div>
@@ -118,18 +118,18 @@
         </article>
       }
 
-      @if (imageItems().length) {
+      @for (group of imageGroups(); track group.image) {
         <section class="image-practice card">
           <div class="image-practice-heading">
             <span class="eyebrow">Look closely</span>
-            <h2>{{ imageItems()[0].imageTitle || 'Picture practice' }}</h2>
+            <h2>{{ group.title }}</h2>
           </div>
           <div class="image-practice-layout">
             <div class="image-preview">
-              <img [src]="imageItems()[0].image" [alt]="imageItems()[0].imageTitle || 'Picture for English practice'" />
+              <img [src]="group.image" [alt]="group.title || 'Picture for English practice'" />
             </div>
             <div class="image-question-list">
-              @for (item of imageItems(); track item.id; let index = $index) {
+              @for (item of group.items; track item.id; let index = $index) {
                 <article class="image-question" [class.is-correct]="resultFor(item.id)?.correct" [class.is-incorrect]="resultFor(item.id) && !resultFor(item.id)?.correct">
                   <div class="question-meta">
                     <span class="question-index">Picture question {{ index + 1 }}</span>
