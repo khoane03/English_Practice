@@ -2,6 +2,228 @@
   margin-bottom: 26px;
 }
 
+.ai-settings {
+  overflow: hidden;
+  margin-bottom: 17px;
+  border: 1px solid #e2e9e0;
+  background: linear-gradient(135deg, #fff 0%, #fbfcfa 100%);
+}
+
+.ai-settings summary {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  color: #51645a;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  list-style: none;
+}
+
+.ai-settings summary::-webkit-details-marker {
+  display: none;
+}
+
+.ai-settings summary::after {
+  width: 8px;
+  height: 8px;
+  margin-left: 4px;
+  border-right: 1.5px solid #7e8e82;
+  border-bottom: 1.5px solid #7e8e82;
+  content: '';
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 150ms ease;
+}
+
+.ai-settings[open] summary::after {
+  transform: rotate(225deg) translate(-2px, -1px);
+}
+
+.ai-settings-icon {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 9px;
+  background: #edf3ec;
+  color: #50705a;
+  font-size: 15px;
+}
+
+.ai-provider {
+  margin-left: 3px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: #f0f3ef;
+  color: #77847a;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ai-settings-summary-hint {
+  margin-left: auto;
+  color: #929d94;
+  font-size: 10px;
+  font-weight: 550;
+}
+
+.ai-settings-content {
+  display: grid;
+  gap: 9px;
+  padding: 0 16px 16px;
+}
+
+.ai-setup-guide {
+  padding: 12px 14px;
+  border: 1px solid #e8eee6;
+  border-radius: 9px;
+  background: #f7f9f6;
+}
+
+.ai-setup-title {
+  color: #51645a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ai-setup-guide ol {
+  display: grid;
+  gap: 5px;
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: #78867d;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.ai-setup-guide a {
+  color: #42664d;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: #bac9ba;
+  text-underline-offset: 2px;
+}
+
+.api-key-label {
+  margin-top: 3px;
+  color: #53645a;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.ai-settings-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.api-key-input-wrap {
+  display: flex;
+  min-width: 0;
+  min-height: 42px;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid #dce4db;
+  border-radius: 8px;
+  background: #fff;
+  color: #849187;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.api-key-input-wrap:focus-within {
+  border-color: #8ca995;
+  box-shadow: 0 0 0 3px rgb(140 169 149 / 14%);
+}
+
+.api-key-input-wrap > span {
+  font-size: 16px;
+}
+
+.api-key-input-wrap input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #35483c;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.api-key-input-wrap input:focus {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+
+.api-key-input-wrap input::placeholder {
+  color: #a2aca4;
+}
+
+.api-key-save {
+  display: inline-flex;
+  min-height: 42px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #4c6d55;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.api-key-save:hover {
+  background: #3c5c46;
+  transform: translateY(-1px);
+}
+
+.api-key-privacy {
+  margin: 0;
+  color: #8a958d;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.ai-settings .ai-settings-notice {
+  margin: 0;
+  color: #4a7554;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+@media (max-width: 520px) {
+  .ai-settings-summary-hint {
+    display: none;
+  }
+
+  .ai-settings-content {
+    padding-inline: 12px;
+  }
+
+  .ai-settings-controls {
+    align-items: stretch;
+  }
+
+  .api-key-save {
+    padding-inline: 11px;
+  }
+}
+
 .back-link {
   display: inline-block;
   margin-bottom: 23px;
