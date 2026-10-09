@@ -56,6 +56,7 @@ export class PracticeService {
         ...question,
         image: exercise.image,
         imageTitle: exercise.title,
+        imageExerciseId: exercise.id,
         source: 'image' as const,
       })),
     );

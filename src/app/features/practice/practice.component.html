@@ -118,15 +118,19 @@
         </article>
       }
 
-      @for (group of imageGroups(); track group.image) {
+      @for (group of imageGroups(); track group.id) {
         <section class="image-practice card">
           <div class="image-practice-heading">
             <span class="eyebrow">Look closely</span>
             <h2>{{ group.title }}</h2>
+            <p class="image-practice-details">
+              {{ group.id }} · {{ group.items.length }}
+              {{ group.items.length === 1 ? 'question' : 'questions' }}
+            </p>
           </div>
           <div class="image-practice-layout">
             <div class="image-preview">
-              <img [src]="group.image" [alt]="group.title || 'Picture for English practice'" />
+              <img [src]="group.image" [alt]="group.title + ' · ' + group.id" />
             </div>
             <div class="image-question-list">
               @for (item of group.items; track item.id; let index = $index) {

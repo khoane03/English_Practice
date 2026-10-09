@@ -31,6 +31,7 @@ export interface PracticeItem {
   explanation?: string;
   image?: string;
   imageTitle?: string;
+  imageExerciseId?: string;
   source: 'text' | 'image';
 }
 
