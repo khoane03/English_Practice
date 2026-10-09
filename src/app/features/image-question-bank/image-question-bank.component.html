@@ -124,6 +124,18 @@
         </div>
         <button class="quiet-button" type="button" aria-label="Close image question editor" (click)="closeQuestionForm()">✕</button>
       </div>
+      @if (questionFormExercise(); as exercise) {
+        <div class="question-image-context">
+          <div class="question-image-preview">
+            <img [src]="exercise.image" [alt]="exercise.title || 'Image for ' + exercise.id" />
+          </div>
+          <div class="question-image-details">
+            <span class="entry-id">{{ exercise.id }} · {{ exercise.questions.length }} {{ exercise.questions.length === 1 ? 'question' : 'questions' }}</span>
+            <h3>{{ exercise.title || 'Picture exercise' }}</h3>
+            <p>The new question will be linked to this image.</p>
+          </div>
+        </div>
+      }
       <form (ngSubmit)="saveImageQuestion()">
         <label class="form-field">
           <span>Question <b aria-hidden="true">*</b></span>

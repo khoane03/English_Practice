@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ImageExercise, ImageQuestion } from '../../core/models/practice.models';
 import { CloudinaryUploadService } from '../../core/services/cloudinary-upload.service';
@@ -29,6 +29,9 @@ export class ImageQuestionBankComponent {
   readonly editingExerciseId = signal<string | null>(null);
   readonly questionFormExerciseId = signal<string | null>(null);
   readonly editingQuestionId = signal<string | null>(null);
+  readonly questionFormExercise = computed(() =>
+    this.exercises().find((exercise) => exercise.id === this.questionFormExerciseId()),
+  );
   readonly notice = signal('');
   readonly confirmation = signal<{
     title: string;

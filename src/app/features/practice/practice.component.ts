@@ -11,6 +11,7 @@ import { AnswerInputComponent } from '../../shared/components/answer-input.compo
 import { LanguageToolsComponent } from '../../shared/components/language-tools.component';
 
 interface ImageQuestionGroup {
+  id: string;
   image: string;
   title: string;
   items: PracticeItem[];
@@ -40,13 +41,14 @@ export class PracticeComponent {
   readonly imageGroups = computed(() => {
     const groups = new Map<string, ImageQuestionGroup>();
     for (const item of this.imageItems()) {
-      const image = item.image ?? '';
-      const group = groups.get(image);
+      const id = item.imageExerciseId ?? item.image ?? item.id;
+      const group = groups.get(id);
       if (group) {
         group.items.push(item);
       } else {
-        groups.set(image, {
-          image,
+        groups.set(id, {
+          id,
+          image: item.image ?? '',
           title: item.imageTitle || 'Picture practice',
           items: [item],
         });

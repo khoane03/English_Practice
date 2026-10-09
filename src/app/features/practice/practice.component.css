@@ -385,6 +385,12 @@
   letter-spacing: -0.02em;
 }
 
+.image-practice-details {
+  margin: 5px 0 0;
+  color: #849087;
+  font-size: 11px;
+}
+
 .image-practice-layout {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -395,8 +401,10 @@
 .image-preview {
   position: sticky;
   top: 106px;
-  overflow: hidden;
-  min-height: 260px;
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  padding: 10px;
   border-radius: 10px;
   background: #f1f3ef;
 }
@@ -405,7 +413,7 @@
   display: block;
   width: 100%;
   max-height: 580px;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .image-question-list {
@@ -516,11 +524,11 @@
 
   .image-preview {
     position: static;
-    min-height: 180px;
+    min-height: 160px;
   }
 
   .image-preview img {
-    max-height: 320px;
+    max-height: 420px;
   }
 
   .question-card {
