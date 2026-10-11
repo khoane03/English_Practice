@@ -1,6 +1,40 @@
-import { Component, inject, input, model, signal } from '@angular/core';
+import { Component, inject, input, model, OnDestroy, signal } from '@angular/core';
 import { AnswerSuggestionService } from '../../core/services/answer-suggestion.service';
 import { LanguageToolsComponent } from './language-tools.component';
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+}
+
+interface SpeechRecognitionResult extends ArrayLike<SpeechRecognitionAlternative> {}
+
+interface SpeechRecognitionEvent {
+  resultIndex: number;
+  results: ArrayLike<SpeechRecognitionResult>;
+}
+
+interface SpeechRecognitionErrorEvent {
+  error: string;
+}
+
+interface SpeechRecognition {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => SpeechRecognition;
+    webkitSpeechRecognition?: new () => SpeechRecognition;
+  }
+}
 
 @Component({
   selector: 'app-answer-input',
@@ -17,6 +51,26 @@ import { LanguageToolsComponent } from './language-tools.component';
       placeholder="Write your answer here..."
       rows="2"
     ></textarea>
+    @if (speechSupported()) {
+      <div class="speech-actions">
+        <button
+          class="suggestion-button microphone-button"
+          type="button"
+          [disabled]="disabled()"
+          [attr.aria-pressed]="recording()"
+          (click)="toggleRecording()"
+        >
+          <span aria-hidden="true">{{ recording() ? '■' : '🎙' }}</span>
+          {{ recording() ? 'Stop listening' : 'Answer with microphone' }}
+        </button>
+        <span class="suggestion-hint">Your browser may use an online speech service to transcribe audio.</span>
+      </div>
+    } @else {
+      <p class="suggestion-hint">Speech input is not supported by this browser.</p>
+    }
+    @if (speechError()) {
+      <p class="suggestion-error" role="alert">{{ speechError() }}</p>
+    }
     <div class="suggestion-actions">
       <button
         class="suggestion-button"
@@ -81,6 +135,17 @@ import { LanguageToolsComponent } from './language-tools.component';
         flex-wrap: wrap;
         align-items: center;
         gap: 8px;
+      }
+      .speech-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+      .microphone-button[aria-pressed='true'] {
+        border-color: #e6c9bd;
+        background: #fff5f1;
+        color: #9a503e;
       }
       .suggestion-button {
         width: fit-content;
@@ -151,7 +216,7 @@ import { LanguageToolsComponent } from './language-tools.component';
     `,
   ],
 })
-export class AnswerInputComponent {
+export class AnswerInputComponent implements OnDestroy {
   readonly suggestions = inject(AnswerSuggestionService);
   readonly id = input.required<string>();
   readonly question = input.required<string>();
@@ -159,12 +224,31 @@ export class AnswerInputComponent {
   readonly imageUrl = input('');
   readonly value = model('');
   readonly disabled = input(false);
+  readonly speechSupported = signal(
+    typeof window !== 'undefined' &&
+      Boolean(window.SpeechRecognition || window.webkitSpeechRecognition),
+  );
+  readonly recording = signal(false);
+  readonly speechError = signal('');
   readonly loadingSuggestion = signal(false);
   readonly suggestion = signal('');
   readonly suggestionError = signal('');
   readonly loadingStructure = signal(false);
   readonly answerStructure = signal('');
   readonly structureError = signal('');
+  private recognition: SpeechRecognition | null = null;
+
+  ngOnDestroy(): void {
+    this.recognition?.abort();
+  }
+
+  toggleRecording(): void {
+    if (this.recording()) {
+      this.recognition?.stop();
+      return;
+    }
+    this.startRecording();
+  }
 
   async suggestAnswer(): Promise<void> {
     this.loadingSuggestion.set(true);
@@ -218,5 +302,56 @@ export class AnswerInputComponent {
 
   useSuggestion(): void {
     this.value.set(this.suggestion());
+  }
+
+  private startRecording(): void {
+    const Recognition = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+    if (!Recognition) {
+      this.speechError.set('Speech recognition is not supported by this browser.');
+      return;
+    }
+
+    const recognition = new Recognition();
+    this.recognition = recognition;
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.resultIndex]?.[0]?.transcript.trim();
+      if (transcript) {
+        const currentAnswer = this.value().trim();
+        this.value.set(currentAnswer ? `${currentAnswer} ${transcript}` : transcript);
+      }
+    };
+    recognition.onerror = (event) => {
+      this.speechError.set(this.speechErrorMessage(event.error));
+    };
+    recognition.onend = () => {
+      this.recording.set(false);
+      this.recognition = null;
+    };
+
+    this.speechError.set('');
+    try {
+      recognition.start();
+      this.recording.set(true);
+    } catch {
+      this.recording.set(false);
+      this.speechError.set('Could not start speech recognition. Please try again.');
+      this.recognition = null;
+    }
+  }
+
+  private speechErrorMessage(error: string): string {
+    if (error === 'not-allowed' || error === 'service-not-allowed') {
+      return 'Microphone access was denied. Allow microphone access in your browser settings and try again.';
+    }
+    if (error === 'audio-capture') {
+      return 'No microphone was found. Connect a microphone and try again.';
+    }
+    if (error === 'no-speech') {
+      return 'No speech was detected. Please try speaking again.';
+    }
+    return 'Speech recognition failed. Please check your microphone and try again.';
   }
 }
