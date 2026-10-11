@@ -16,29 +16,31 @@ import { TranslationService } from '../../core/services/translation.service';
         >
           <span aria-hidden="true">◖</span> Read aloud
         </button>
-        <button
-          class="tool-button"
-          type="button"
-          [disabled]="!text().trim() || translating()"
-          [attr.aria-expanded]="showTranslation()"
-          (click)="toggleTranslation()"
-        >
-          @if (translating()) {
-            <span class="mini-spinner" aria-hidden="true"></span> Translating…
-          } @else if (showTranslation()) {
-            Hide translation
-          } @else {
-            <span aria-hidden="true">文</span> Dịch tiếng Việt
-          }
-        </button>
+        @if (!speechOnly()) {
+          <button
+            class="tool-button"
+            type="button"
+            [disabled]="!text().trim() || translating()"
+            [attr.aria-expanded]="showTranslation()"
+            (click)="toggleTranslation()"
+          >
+            @if (translating()) {
+              <span class="mini-spinner" aria-hidden="true"></span> Translating…
+            } @else if (showTranslation()) {
+              Hide translation
+            } @else {
+              <span aria-hidden="true">文</span> Dịch tiếng Việt
+            }
+          </button>
+        }
       </div>
       @if (speechError()) {
         <p class="tool-error" role="status">{{ speechError() }}</p>
       }
-      @if (translationError()) {
+      @if (!speechOnly() && translationError()) {
         <p class="tool-error" role="alert">{{ translationError() }}</p>
       }
-      @if (showTranslation() && translation()) {
+      @if (!speechOnly() && showTranslation() && translation()) {
         <p class="translation" lang="vi" aria-live="polite">
           <span>Bản dịch tham khảo</span>
           {{ translation() }}
@@ -127,6 +129,7 @@ import { TranslationService } from '../../core/services/translation.service';
 export class LanguageToolsComponent {
   readonly text = input.required<string>();
   readonly label = input('text');
+  readonly speechOnly = input(false);
   readonly translating = signal(false);
   readonly showTranslation = signal(false);
   readonly translation = signal('');

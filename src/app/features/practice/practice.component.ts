@@ -17,6 +17,12 @@ interface ImageQuestionGroup {
   items: PracticeItem[];
 }
 
+interface FullTestStep {
+  id: string;
+  items: PracticeItem[];
+  source: PracticeItem['source'];
+}
+
 @Component({
   selector: 'app-practice',
   imports: [CommonModule, FormsModule, RouterLink, AnswerInputComponent, LanguageToolsComponent],
@@ -34,8 +40,29 @@ export class PracticeComponent {
 
   readonly mode = signal<'mixed' | 'full'>('mixed');
   readonly items = signal<PracticeItem[]>([]);
+  readonly currentIndex = signal(0);
+  readonly revealedQuestions = signal<Record<string, boolean>>({});
   readonly answers = signal<Record<string, string>>({});
   readonly result = signal<AnswerReview[] | null>(null);
+  readonly fullTestSteps = computed<FullTestStep[]>(() => {
+    const steps = new Map<string, FullTestStep>();
+    for (const item of this.items()) {
+      const id = item.source === 'image' ? `image:${item.imageExerciseId ?? item.id}` : `text:${item.id}`;
+      const step = steps.get(id);
+      if (step) {
+        step.items.push(item);
+      } else {
+        steps.set(id, { id, items: [item], source: item.source });
+      }
+    }
+    return [...steps.values()];
+  });
+  readonly currentStep = computed(() => this.fullTestSteps()[this.currentIndex()]);
+  readonly fullTestProgress = computed(() =>
+    this.fullTestSteps().length
+      ? ((this.currentIndex() + 1) / this.fullTestSteps().length) * 100
+      : 0,
+  );
   readonly textItems = computed(() => this.items().filter((item) => item.source === 'text'));
   readonly imageItems = computed(() => this.items().filter((item) => item.source === 'image'));
   readonly imageGroups = computed(() => {
@@ -72,6 +99,8 @@ export class PracticeComponent {
 
   start(): void {
     this.result.set(null);
+    this.currentIndex.set(0);
+    this.revealedQuestions.set({});
     this.answers.set({});
     this.items.set(
       this.mode() === 'full'
@@ -100,6 +129,27 @@ export class PracticeComponent {
 
   submit(): void {
     this.result.set(this.practice.evaluate(this.items(), this.answers()));
+  }
+
+  finishCurrentQuestion(): void {
+    if (this.currentIndex() === this.fullTestSteps().length - 1) {
+      this.submit();
+      return;
+    }
+
+    this.currentIndex.update((index) => index + 1);
+    this.revealedQuestions.set({});
+  }
+
+  questionIsRevealed(id: string): boolean {
+    return this.revealedQuestions()[id] ?? false;
+  }
+
+  toggleQuestionReveal(id: string): void {
+    this.revealedQuestions.update((revealed) => ({
+      ...revealed,
+      [id]: !revealed[id],
+    }));
   }
 
   isFirstImageItem(index: number): boolean {
